@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Conexão Zaut</title>
+    <style>
+        :root {
+            --laranja: #ff6600;
+            --preto: #1a1a1a;
+            --cinza-claro: #f4f4f4;
+            --cinza-dark: #333;
+            --branco: #ffffff;
+        }
+
+        body {
+            font-family: 'Arial Black', Gadget, sans-serif;
+            background-color: var(--cinza-claro);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Logos */
+        header, footer {
+            background-color: var(--preto);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-img {
+            max-height: 80px;
+            width: auto;
+        }
+
+        /* Sistema de Abas */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background: var(--cinza-dark);
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            border: none;
+            background: none;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .tab-btn.active {
+            background: var(--laranja);
+            color: var(--preto);
+        }
+
+        .content-section { display: none; padding: 20px; }
+        .content-section.active { display: block; }
+
+        /* Quadro Branco (Visão do Público) */
+        .display-board {
+            background-color: var(--branco);
+            border: 6px solid var(--preto);
+            border-radius: 15px;
+            max-width: 1000px;
+            margin: 20px auto;
+            min-height: 450px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .board-header {
+            background: var(--preto);
+            color: var(--laranja);
+            padding: 20px;
+            text-align: center;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
+        }
+
+        #found-names-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 30px;
+            justify-content: center;
+        }
+
+        .name-badge {
+            background: var(--laranja);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 1.6rem;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.1);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Painel Admin */
+        .admin-controls-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            border: 2px solid var(--preto);
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .admin-item {
+            padding: 15px;
+            background: white;
+            border: 2px solid #ddd;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .admin-item.active {
+            background: var(--laranja);
+            color: white;
+            border-color: var(--laranja);
+        }
+
+        .reset-btn {
+            margin-top: 30px;
+            padding: 12px 25px;
+            background: #d9534f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="conexao zaut.png" alt="Conexão Zaut" class="logo-img">
+</header>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="openTab('publico')">VISÃO DO PÚBLICO</button>
+    <button class="tab-btn" onclick="openTab('admin')">PAINEL ADMIN</button>
+</div>
+
+<div id="publico" class="content-section active">
+    <div class="display-board">
+        <div class="board-header">NOMES ENCONTRADOS</div>
+        <div id="found-names-container">
+            </div>
+    </div>
+</div>
+
+<div id="admin" class="content-section">
+    <div class="admin-controls-wrapper">
+        <input type="text" id="nameSearch" class="search-box" placeholder="🔍 Buscar nome na lista..." onkeyup="filterNames()">
+        
+        <div class="admin-grid" id="admin-controls">
+            </div>
+
+        <button class="reset-btn" onclick="resetAll()">LIMPAR QUADRO COMPLETO</button>
+    </div>
+</div>
+
+<footer>
+    <img src="logo-horizontal-laranja.png" alt="Zaut Fitness" class="logo-img" style="max-height: 50px;">
+</footer>
+
+<script>
+    const listaNomes = [
+        "Alex", "Andreia", "Anizio", "Barreto", "Barraca", "Brenno", "Bruno", "Camila", "Carla", "Cibele", "Clara", "Cleyverte", "Crislany", "Daniel Jr", "Daniel", "Elisa", "Elizabete", "Erika", "Ezequiel", "Francinilda", "Gabriel", "Geovane", "Girlene", "Gislayne", "Helton", "Hellen", "Ícaro", "James", "Jeferson", "João", "Jorge", "Karol", "Lara", "Laura", "Leticia", "Lohan", "Luana", "Luiza", "Manu", "Marcondes", "Mariana", "Matheus", "Nadja", "Nayane", "Neto", "Priscila", "Rafael", "Raul", "Renildo", "Samyla", "Silvana", "Tâmires", "Victor", "Vinicius", "Wesley"
+    ].sort();
+
+    function openTab(tabName) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function updateDisplay() {
+        const found = JSON.parse(localStorage.getItem('zaut_encontrados') || '[]');
+        const container = document.getElementById('found-names-container');
+        container.innerHTML = '';
+        
+        found.forEach(nome => {
+            const span = document.createElement('span');
+            span.className = 'name-badge';
+            span.textContent = nome;
+            container.appendChild(span);
+        });
+
+        document.querySelectorAll('.admin-item').forEach(btn => {
+            if(found.includes(btn.getAttribute('data-name'))) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    function toggleNome(nome) {
+        let found = JSON.parse(localStorage.getItem('zaut_encontrados') || '[]');
+        if (found.includes(nome)) {
+            found = found.filter(n => n !== nome);
+        } else {
+            found.push(nome);
+        }
+        localStorage.setItem('zaut_encontrados', JSON.stringify(found));
+        updateDisplay();
+    }
+
+    function filterNames() {
+        const query = document.getElementById('nameSearch').value.toLowerCase();
+        document.querySelectorAll('.admin-item').forEach(item => {
+            const name = item.textContent.toLowerCase();
+            item.style.display = name.includes(query) ? 'block' : 'none';
+        });
+    }
+
+    function resetAll() {
+        if(confirm("Deseja apagar todos os nomes do quadro branco?")) {
+            localStorage.setItem('zaut_encontrados', '[]');
+            updateDisplay();
+        }
+    }
+
+    // Inicializar Grade Admin
+    const adminGrid = document.getElementById('admin-controls');
+    listaNomes.forEach(nome => {
+        const div = document.createElement('div');
+        div.className = 'admin-item';
+        div.textContent = nome;
+        div.setAttribute('data-name', nome);
+        div.onclick = () => toggleNome(nome);
+        adminGrid.appendChild(div);
+    });
+
+    window.addEventListener('storage', updateDisplay);
+    updateDisplay();
+</script>
+
+</body>
+</html>
